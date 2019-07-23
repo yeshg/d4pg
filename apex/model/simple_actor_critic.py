@@ -20,15 +20,12 @@ class Policy(nn.Module):
         x = self.max_action * torch.tanh(self.l2(x))
         return x
 
-    def select_action(self, state, device, param_noise=None):
+    def select_action(self, state, device):
         state = torch.FloatTensor(state.reshape(1, -1)).to(device)
 
         self.eval()
 
-        if param_noise is not None:
-            return self.actor_perturbed(state).cpu().data.numpy().flatten()
-        else:
-            return self(state).cpu().data.numpy().flatten()
+        return self(state).cpu().data.numpy().flatten()
 
 class DDPGCritic(nn.Module):
     def __init__(self, state_dim, action_dim, max_action, hidden_size):
