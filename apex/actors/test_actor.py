@@ -1,4 +1,4 @@
-# from apex.model.layernorm_actor_critic import LN_Actor as Actor
+from apex.model.layernorm_actor_critic import LN_Actor as LN_Actor
 from apex.replay import ReplayMemory
 from apex.utils import AdaptiveParamNoiseSpec, VisdomLinePlotter
 
@@ -25,7 +25,7 @@ class Actor(object):
         self.action_dim = self.env.action_space.shape[0]
         self.max_action = float(self.env.action_space.high[0])
 
-        # self.policy = Actor(self.state_dim, self.action_dim, self.max_action, 400, 300).to(device)
+        #self.policy = LN_Actor(self.state_dim, self.action_dim, self.max_action, 400, 300).to(device)
         self.learner_id = learner_id
         self.memory_id = memory_id
         
@@ -39,7 +39,7 @@ class Actor(object):
         self.total_timesteps = 0
         self.actor_timesteps = 0
         self.episode_num = 0
-        self.load_freq = 10
+        self.load_freq = 10             # initial load frequency... make this taper down to 1 over time 
 
         self.plotter_id = plotter_id
         self.id = id

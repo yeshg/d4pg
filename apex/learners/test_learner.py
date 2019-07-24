@@ -44,7 +44,10 @@ class Learner(object):
                  batch_size=500, discount=0.99, tau=0.005, eval_update_freq=10,
                  target_update_freq=2000, evaluate_freq=50, num_of_evaluators=30):
 
-        self.device = torch.device("cpu")
+        # THIS WORKS, but rest doesn't when trying to use GPU for learner
+        print("This function is allowed to use GPUs {}.".format(ray.get_gpu_ids()))
+
+        self.device = torch.device('cpu')
 
         # keep uninstantiated constructor for evaluator
         self.env_fn = env_fn
@@ -242,7 +245,6 @@ class Learner(object):
         return 0
 
     def get_global_policy(self):
-        print("returning global policy")
         return self.actor, self.is_training_finished()
 
     def get_global_timesteps(self):
