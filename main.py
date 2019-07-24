@@ -54,7 +54,7 @@ parser.add_argument("--policy_name", default="TD3")                             
 parser.add_argument("--start_timesteps", default=1e4, type=int)                 # How many time steps purely random policy is run for
 
 # evaluator args
-parser.add_argument("--num_evaluators", default=1, type=int)                    # Number of evaluators
+parser.add_argument("--num_evaluators", default=30, type=int)                    # Number of evaluators
 parser.add_argument("--viz_port", default=8098)                                 # visdom server port
 
 args = parser.parse_args()

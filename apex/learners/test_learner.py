@@ -42,7 +42,7 @@ import ray
 class Learner(object):
     def __init__(self, env_fn, memory_server, learning_episodes, state_space, action_space, plotter_id,
                  batch_size=500, discount=0.99, tau=0.005, eval_update_freq=10,
-                 target_update_freq=2000, evaluate_freq=50, num_of_evaluators=10):
+                 target_update_freq=2000, evaluate_freq=50, num_of_evaluators=30):
 
         self.device = torch.device("cpu")
 
@@ -212,7 +212,7 @@ class Learner(object):
                     target_param.data.copy_(
                         self.tau * param.data + (1 - self.tau) * target_param.data)
 
-    def evaluate(self, trials=30, num_of_workers=10):
+    def evaluate(self, trials=30, num_of_workers=30):
         # initialize evaluators
         evaluators = [evaluator.remote(self.env_fn, self.actor, max_traj_len=400)
                       for _ in range(num_of_workers)]
