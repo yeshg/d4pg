@@ -49,7 +49,7 @@ parser.add_argument("--training_episodes", default=10000, type=float)           
 parser.add_argument("--batch_size", default=100, type=int)                      # Batch size for both actor and critic
 
 # actor specific args
-parser.add_argument("--num_actors", default=1, type=int)                        # Number of actors
+parser.add_argument("--num_actors", default=30, type=int)                        # Number of actors
 parser.add_argument("--policy_name", default="TD3")                             # Policy name
 parser.add_argument("--start_timesteps", default=1e4, type=int)                 # How many time steps purely random policy is run for
 
@@ -60,14 +60,14 @@ parser.add_argument("--viz_port", default=8098)                                 
 args = parser.parse_args()
 
 import ray
-ray.init(num_gpus=0, include_webui=True)
+ray.init(num_gpus=1, include_webui=True)
 
 if __name__ == "__main__":
     #torch.set_num_threads(4)
 
     # Experiment Name
     experiment_name = "{}_{}_{}".format(args.policy_name, args.env_name, args.num_actors)
-    print("Policy: {}\nEnvironment: {}\n# of Actors:{}".format(args.policy_name, args.env_name, args.num_actors))
+    print("DISTRIBUTED Policy: {}\nEnvironment: {}\n# of Actors:{}".format(args.policy_name, args.env_name, args.num_actors))
 
     # Environment and Visdom Monitoring (TODO: find way to get ray remotes do visdom logging)
     env_fn = gym_factory(args.env_name)
@@ -83,6 +83,9 @@ if __name__ == "__main__":
 
     # Create remote actors
     actors_ids = [Actor.remote(env_fn, learner_id, memory_id, action_dim, plotter_id, i) for i in range(args.num_actors)]
+
+    # # start learner loop process (non-blocking)
+    # learner_id.update_and_evaluate.remote()
 
     start = time.time()
 

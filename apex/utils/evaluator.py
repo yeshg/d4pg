@@ -1,6 +1,8 @@
 import torch
 import ray
 
+from apex.model.layernorm_actor_critic import LN_Actor as Actor
+
 import numpy as np
 
 device = torch.device("cpu")
@@ -15,31 +17,29 @@ def select_action(Policy, state, device):
 @ray.remote
 def evaluator(env, policy, max_traj_len):
 
-    return evaluate_policy(env(), policy, max_traj_len)
+    env = env()
 
-    # env = env()
+    state = env.reset()
+    total_reward = 0
+    steps = 0
+    done = False
 
-    # state = env.reset()
-    # total_reward = 0
-    # steps = 0
-    # done = False
+    # evaluate performance of the passed model for one episode
+    while steps < max_traj_len and not done:
+        # use model's greedy policy to predict action
+        action = select_action(policy, np.array(state), device)
 
-    # # evaluate performance of the passed model for one episode
-    # while steps < max_traj_len and not done:
-    #     # use model's greedy policy to predict action
-    #     action = select_action(policy, np.array(state), device)
+        # take a step in the simulation
+        next_state, reward, done, _ = env.step(action)
 
-    #     # take a step in the simulation
-    #     next_state, reward, done, _ = env.step(action)
+        # update state
+        state = next_state
 
-    #     # update state
-    #     state = next_state
+        # increment total_reward and step count
+        total_reward += reward
+        steps += 1
 
-    #     # increment total_reward and step count
-    #     total_reward += reward
-    #     steps += 1
-
-    # return total_reward
+    return total_reward
 
 
 def evaluate_policy(env, policy, max_episode_steps, eval_episodes=1):
@@ -49,6 +49,7 @@ def evaluate_policy(env, policy, max_episode_steps, eval_episodes=1):
         t = 0
         done_bool = 0.0
         while not done_bool:
+            env.render()
             t += 1
             action = select_action(policy, np.array(obs), device)
             obs, reward, done, _ = env.step(action)
