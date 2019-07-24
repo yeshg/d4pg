@@ -10,8 +10,8 @@ import ray
 @ray.remote
 class VisdomLinePlotter(object):
     """Plots to Visdom"""
-    def __init__(self, env_name='main', port=8097):
-        self.viz = Visdom()
+    def __init__(self, env_name, port):
+        self.viz = Visdom(port=port)
         self.env = env_name
         self.plots = {}
     def plot(self, var_name, x_var_name, split_name, title_name, x, y):
