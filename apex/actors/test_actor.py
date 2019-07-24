@@ -18,7 +18,7 @@ def select_action(Policy, state, device):
 
 @ray.remote
 class Actor(object):
-    def __init__(self, env_fn, learner_id, memory_id, action_dim, plotter_id, id):
+    def __init__(self, env_fn, learner_id, memory_id, action_dim, plotter_id, start_timesteps, load_freq, taper_load_freq, act_noise, noise_scale, param_noise, id):
         self.env = env_fn()
 
         self.state_dim = self.env.observation_space.shape[0]
@@ -29,17 +29,18 @@ class Actor(object):
         self.learner_id = learner_id
         self.memory_id = memory_id
         
-        self.start_timesteps = 1000 // 30
-        self.act_noise = 0.3
-        self.noise_scale=0.3
-        self.param_noise = AdaptiveParamNoiseSpec(initial_stddev=0.05, desired_action_stddev=self.noise_scale, adaptation_coefficient=1.05)
+        self.start_timesteps = start_timesteps
+        self.act_noise = act_noise
+        self.noise_scale = noise_scale
+        self.param_noise = AdaptiveParamNoiseSpec(initial_stddev=0.05, desired_action_stddev=self.noise_scale, adaptation_coefficient=1.05) if param_noise else None
 
         self.max_traj_len = 400
 
-        self.total_timesteps = 0
         self.actor_timesteps = 0
+        self.taper_timesteps = 0
         self.episode_num = 0
-        self.load_freq = 10             # initial load frequency... make this taper down to 1 over time 
+        self.taper_load_freq = taper_load_freq
+        self.load_freq = load_freq             # initial load frequency... make this taper down to 1 over time 
 
         self.plotter_id = plotter_id
         self.id = id
@@ -118,3 +119,7 @@ class Actor(object):
                 self.episode_num += 1
                 self.plotter_id.plot.remote('return', 'Actor timesteps','actor {}'.format(self.id), 'Actor Episode Return', self.actor_timesteps, episode_reward)
                 ray.wait([self.learner_id.increment_episode_count.remote()], num_returns=1)
+
+                if self.taper_load_freq and self.taper_timesteps >= 2000:
+                    self.load_freq = self.load_freq // 2
+                    print("Increased load frequency")
