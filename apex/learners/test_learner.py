@@ -105,7 +105,7 @@ class Learner(object):
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters())
 
         # visdom plotter
-        self.plotter_id = plotter_id
+        # self.plotter_id = plotter_id
 
         # evaluate untrained policy
         print('Untrained Policy: {}'.format( self.evaluate(num_of_workers=self.num_of_evaluators) ))
