@@ -245,7 +245,7 @@ class Learner(object):
 
         # return average reward
         avg_reward = total_rewards / trials
-        memory_id.plot_learner_results.remote(self.step_count, avg_reward)
+        self.memory_id.plot_learner_results.remote(self.step_count, avg_reward)
 
         print("eval time: {}".format(time.time()-start_time))
 
