@@ -108,7 +108,7 @@ class Learner(object):
         # self.plotter_id = plotter_id
 
         # evaluate untrained policy
-        print('Untrained Policy: {}'.format( self.evaluate(num_of_workers=self.num_of_evaluators) ))
+        print('Untrained Policy: {}'.format( self.evaluate(trials=self.num_of_evaluators, num_of_workers=self.num_of_evaluators) ))
 
         # also dump ray timeline
         ray.timeline(filename="./ray_timeline.json")
@@ -142,7 +142,7 @@ class Learner(object):
             self.eval_episode_count = 0
 
             # evaluate learned policy
-            self.results.append(self.evaluate(num_of_workers=self.num_of_evaluators))
+            self.results.append(self.evaluate(trials=self.num_of_evaluators, num_of_workers=self.num_of_evaluators))
             print('Episode {}: {}'.format(self.episode_count, self.results[-1]))
 
             # also save
