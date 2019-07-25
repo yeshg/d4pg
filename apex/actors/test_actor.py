@@ -118,7 +118,7 @@ class Actor(object):
                 self.episode_num += 1
                 
                 # pass episode details to visdom logger on memory server
-                self.memory_id.plot_actor_results(self.id, self.actor_timesteps, episode_reward)
+                self.memory_id.plot_actor_results.remote(self.id, self.actor_timesteps, episode_reward)
 
                 ray.wait([self.learner_id.increment_episode_count.remote()], num_returns=1)
 
