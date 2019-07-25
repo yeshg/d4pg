@@ -13,3 +13,6 @@ eggs/
 .eggs/
 *.egg-info
 *.egg
+
+# Ray timeline
+ray_timeline.json

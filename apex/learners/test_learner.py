@@ -8,6 +8,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 
+import time
+
 import gym
 import gym_cassie
 
@@ -155,6 +157,9 @@ class Learner(object):
 
     def update_eval_model(self, policy_noise=0.2, noise_clip=0.5, policy_freq=2):
         with ray.profile("Learner optimization loop", extra_data={'Episode count': str(self.episode_count)}):
+
+            start_time = time.time()
+
             if ray.get(self.memory.storage_size.remote()) < self.batch_size:
                 print("not enough experience yet")
                 return
@@ -196,7 +201,7 @@ class Learner(object):
             # Delayed policy updates
             if self.update_counter % policy_freq == 0:
 
-                print("optimizing at timestep {} | replay size = {} | episode count = {} | update count = {} ".format(self.step_count, ray.get(self.memory.storage_size.remote()), self.episode_count, self.update_counter))
+                print("optimizing at timestep {} | time = {} | replay size = {} | episode count = {} | update count = {} ".format(self.step_count, time.time()-start_time, ray.get(self.memory.storage_size.remote()), self.episode_count, self.update_counter))
 
                 # Compute actor loss
                 actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
@@ -216,6 +221,9 @@ class Learner(object):
                         self.tau * param.data + (1 - self.tau) * target_param.data)
 
     def evaluate(self, trials=30, num_of_workers=30):
+
+        start_time = time.time()
+
         # initialize evaluators
         evaluators = [evaluator.remote(self.env_fn, self.actor, max_traj_len=400)
                       for _ in range(num_of_workers)]
@@ -238,6 +246,8 @@ class Learner(object):
         # return average reward
         avg_reward = total_rewards / trials
         self.plotter_id.plot.remote('Agent Return', 'Global Timesteps','eval', 'Agent Return', self.step_count, avg_reward)
+
+        print("eval time: {}".format(time.time()-start_time))
 
         return avg_reward
 

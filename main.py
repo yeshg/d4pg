@@ -65,7 +65,7 @@ parser.add_argument("--taper_load_freq", type=bool, default=True)               
 
 # evaluator args
 parser.add_argument("--num_evaluators", default=30, type=int)                   # Number of evaluators
-parser.add_argument("--viz_port", default=8098)                                 # visdom server port
+parser.add_argument("--viz_port", default=8097)                                 # visdom server port
 
 args = parser.parse_args()
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     learner_id = Learner.remote(env_fn, memory_id, args.training_episodes, obs_dim, action_dim, plotter_id, batch_size=args.batch_size, discount=args.discount, eval_update_freq=args.eval_update_freq, evaluate_freq=args.evaluate_freq, num_of_evaluators=args.num_evaluators)
 
     # Create remote actors
-    actors_ids = [Actor.remote(env_fn, learner_id, memory_id, action_dim, plotter_id, args.start_timesteps, args.initial_load_freq, args.taper_load_freq, args.act_noise, args.noise_scale, args.param_noise, i) for i in range(args.num_actors)]
+    actors_ids = [Actor.remote(env_fn, learner_id, memory_id, action_dim, plotter_id, args.start_timesteps // args.num_actors, args.initial_load_freq, args.taper_load_freq, args.act_noise, args.noise_scale, args.param_noise, i) for i in range(args.num_actors)]
 
     # # start learner loop process (non-blocking)
     # learner_id.update_and_evaluate.remote()

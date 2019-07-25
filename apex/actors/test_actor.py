@@ -117,7 +117,7 @@ class Actor(object):
 
                 # episode is over, increment episode count and plot episode info
                 self.episode_num += 1
-                self.plotter_id.plot.remote('return', 'Actor timesteps','actor {}'.format(self.id), 'Actor Episode Return', self.actor_timesteps, episode_reward)
+                #self.plotter_id.plot.remote('return', 'Actor timesteps','actor {}'.format(self.id), 'Actor Episode Return', self.actor_timesteps, episode_reward)
                 ray.wait([self.learner_id.increment_episode_count.remote()], num_returns=1)
 
                 if self.taper_load_freq and self.taper_timesteps >= 2000:
