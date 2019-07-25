@@ -62,15 +62,17 @@ parser.add_argument("--act_noise", default=0.3, type=float)                     
 parser.add_argument('--param_noise', type=bool, default=True)                   # param noise
 parser.add_argument('--noise_scale', type=float, default=0.3)                   # noise scale for param noise
 parser.add_argument("--taper_load_freq", type=bool, default=True)               # initial amount of time between loading global model
+parser.add_argument("--viz_actors", type=bool, default=True)                    # Visualize actors in visdom or not
 
 # evaluator args
+parser.add_argument("--num_trials", default=30, type=int)                       # Number of evaluators
 parser.add_argument("--num_evaluators", default=30, type=int)                   # Number of evaluators
 parser.add_argument("--viz_port", default=8097)                                 # visdom server port
 
 args = parser.parse_args()
 
 import ray
-ray.init(num_gpus=1, include_webui=True)
+ray.init(num_gpus=1, include_webui=True, temp_dir="./ray_tmp")
 
 if __name__ == "__main__":
     #torch.set_num_threads(4)
