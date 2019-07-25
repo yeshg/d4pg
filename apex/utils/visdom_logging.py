@@ -7,7 +7,6 @@ import numpy as np
 import ray
 
 
-@ray.remote
 class VisdomLinePlotter(object):
     """Plots to Visdom"""
     def __init__(self, env_name, port):

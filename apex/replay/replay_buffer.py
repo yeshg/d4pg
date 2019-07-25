@@ -2,6 +2,9 @@ import random
 import numpy as np
 import ray
 
+# Plot results
+from apex.utils import VisdomLinePlotter
+
 # Code based on:
 # https://github.com/openai/baselines/blob/master/baselines/deepq/replay_buffer.py
 
@@ -9,7 +12,7 @@ import ray
 
 @ray.remote
 class ReplayBuffer_remote(object):
-    def __init__(self, size):
+    def __init__(self, size, experiment_name, viz_port):
         """Create Replay buffer.
         Parameters
         ----------
@@ -20,6 +23,10 @@ class ReplayBuffer_remote(object):
         self.storage = []
         self.max_size = size
         self.ptr = 0
+
+        self.plot_storage = []
+        self.plotter = VisdomLinePlotter(env_name=experiment_name, port=viz_port)
+
         print("Created replay buffer with size {}".format(self.max_size))
     
     def __len__(self):
@@ -59,3 +66,6 @@ class ReplayBuffer_remote(object):
             u.append(np.array(U, copy=False))
         
         return np.array(x), np.array(u)
+
+    def plot_actor_results(self, actor_id, actor_timesteps, episode_reward):
+        self.plotter.plot('return', 'Actor timesteps','actor {}'.format(actor_id), 'Actor Episode Return', actor_timesteps, episode_reward)

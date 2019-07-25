@@ -81,20 +81,20 @@ if __name__ == "__main__":
     experiment_name = "{}_{}_{}".format(args.policy_name, args.env_name, args.num_actors)
     print("DISTRIBUTED Policy: {}\nEnvironment: {}\n# of Actors:{}".format(args.policy_name, args.env_name, args.num_actors))
 
-    # Environment and Visdom Monitoring (TODO: find way to get ray remotes do visdom logging)
+    # Environment and Visdom Monitoring
     env_fn = gym_factory(args.env_name)
     obs_dim = env_fn().observation_space.shape[0]
     action_dim = env_fn().action_space.shape[0]
 
     # create remote visdom logger
-    plotter_id = VisdomLinePlotter.remote(env_name=experiment_name, port=args.viz_port)
+    # plotter_id = VisdomLinePlotter.remote(env_name=experiment_name, port=args.viz_port)
 
     # Create remote learner (learner will create the evaluators) and replay buffer
-    memory_id = ReplayBuffer_remote.remote(args.replay_size)
+    memory_id = ReplayBuffer_remote.remote(args.replay_size, experiment_name, args.viz_port)
     learner_id = Learner.remote(env_fn, memory_id, args.training_episodes, obs_dim, action_dim, plotter_id, batch_size=args.batch_size, discount=args.discount, eval_update_freq=args.eval_update_freq, evaluate_freq=args.evaluate_freq, num_of_evaluators=args.num_evaluators)
 
     # Create remote actors
-    actors_ids = [Actor.remote(env_fn, learner_id, memory_id, action_dim, plotter_id, args.start_timesteps // args.num_actors, args.initial_load_freq, args.taper_load_freq, args.act_noise, args.noise_scale, args.param_noise, i) for i in range(args.num_actors)]
+    actors_ids = [Actor.remote(env_fn, learner_id, memory_id, action_dim, args.start_timesteps // args.num_actors, args.initial_load_freq, args.taper_load_freq, args.act_noise, args.noise_scale, args.param_noise, i) for i in range(args.num_actors)]
 
     # # start learner loop process (non-blocking)
     # learner_id.update_and_evaluate.remote()

@@ -18,7 +18,7 @@ def select_action(Policy, state, device):
 
 @ray.remote
 class Actor(object):
-    def __init__(self, env_fn, learner_id, memory_id, action_dim, plotter_id, start_timesteps, load_freq, taper_load_freq, act_noise, noise_scale, param_noise, id):
+    def __init__(self, env_fn, learner_id, memory_id, action_dim, start_timesteps, load_freq, taper_load_freq, act_noise, noise_scale, param_noise, id):
         self.env = env_fn()
 
         self.state_dim = self.env.observation_space.shape[0]
@@ -42,7 +42,6 @@ class Actor(object):
         self.taper_load_freq = taper_load_freq
         self.load_freq = load_freq             # initial load frequency... make this taper down to 1 over time 
 
-        self.plotter_id = plotter_id
         self.id = id
 
         self.policy, self.training_done = ray.get(self.learner_id.get_global_policy.remote())
@@ -117,7 +116,10 @@ class Actor(object):
 
                 # episode is over, increment episode count and plot episode info
                 self.episode_num += 1
-                #self.plotter_id.plot.remote('return', 'Actor timesteps','actor {}'.format(self.id), 'Actor Episode Return', self.actor_timesteps, episode_reward)
+                
+                # pass episode details to visdom logger on memory server
+                memory_id.plot_actor_results(self.id, self.actor_timesteps, episode_reward)
+
                 ray.wait([self.learner_id.increment_episode_count.remote()], num_returns=1)
 
                 if self.taper_load_freq and self.taper_timesteps >= 2000:
