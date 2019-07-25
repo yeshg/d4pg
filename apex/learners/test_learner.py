@@ -42,7 +42,7 @@ import ray
 
 @ray.remote(num_gpus=1)
 class Learner(object):
-    def __init__(self, env_fn, memory_server, learning_episodes, state_space, action_space, plotter_id,
+    def __init__(self, env_fn, memory_server, learning_episodes, state_space, action_space,
                  batch_size=500, discount=0.99, tau=0.005, eval_update_freq=10,
                  target_update_freq=2000, evaluate_freq=50, num_of_evaluators=30):
 
@@ -245,7 +245,7 @@ class Learner(object):
 
         # return average reward
         avg_reward = total_rewards / trials
-        self.plotter_id.plot.remote('Agent Return', 'Global Timesteps','eval', 'Agent Return', self.step_count, avg_reward)
+        memory_id.plot_learner_results.remote(self.step_count, avg_reward)
 
         print("eval time: {}".format(time.time()-start_time))
 
