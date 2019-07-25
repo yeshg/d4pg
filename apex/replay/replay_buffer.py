@@ -71,4 +71,4 @@ class ReplayBuffer_remote(object):
         self.plotter.plot('return', 'Actor timesteps','actor {}'.format(actor_id), 'Actor Episode Return', actor_timesteps, episode_reward)
 
     def plot_learner_results(self, step_count, avg_reward):
-        self.plotter.plot.remote('Agent Return', 'Global Timesteps','eval', 'Agent Return', step_count, avg_reward)
+        self.plotter.plot('Agent Return', 'Global Timesteps','eval', 'Agent Return', step_count, avg_reward)
