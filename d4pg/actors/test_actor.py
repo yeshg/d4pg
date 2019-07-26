@@ -1,6 +1,6 @@
-from apex.model.layernorm_actor_critic import LN_Actor as LN_Actor
-from apex.replay import ReplayMemory
-from apex.utils import AdaptiveParamNoiseSpec, VisdomLinePlotter
+from d4pg.model.layernorm_actor_critic import LN_Actor as LN_Actor
+from d4pg.replay import ReplayMemory
+from d4pg.utils import AdaptiveParamNoiseSpec, VisdomLinePlotter
 
 import numpy as np
 import torch

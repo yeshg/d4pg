@@ -1,16 +1,19 @@
 import argparse
 import time
 
-
-from apex.actors import Actor
-from apex.learners import Learner
-from apex.replay import ReplayBuffer_remote
+from d4pg.actors import Actor
+from d4pg.learners import Learner
+from d4pg.replay import ReplayBuffer_remote
 
 # Plot results
-from apex.utils import VisdomLinePlotter
+from d4pg.utils import VisdomLinePlotter
 
 import gym
-import gym_cassie
+
+def make_cassie_env(*args, **kwargs):
+    def _thunk():
+        return CassieEnv(*args, **kwargs)
+    return _thunk
 
 def gym_factory(path, **kwargs):
     from functools import partial
@@ -54,7 +57,7 @@ parser.add_argument("--eval_update_freq", default=10, type=int)                 
 parser.add_argument("--evaluate_freq", default=50, type=int)                    # how often to evaluate learner
 
 # actor specific args
-parser.add_argument("--num_actors", default=30, type=int)                       # Number of actors
+parser.add_argument("--num_actors", default=4, type=int)                       # Number of actors
 parser.add_argument("--policy_name", default="TD3")                             # Policy name
 parser.add_argument("--start_timesteps", default=1e4, type=int)                 # How many time steps purely random policy is run for
 parser.add_argument("--initial_load_freq", default=10, type=int)                # initial amount of time between loading global model
@@ -65,14 +68,14 @@ parser.add_argument("--taper_load_freq", type=bool, default=True)               
 parser.add_argument("--viz_actors", type=bool, default=True)                    # Visualize actors in visdom or not
 
 # evaluator args
-parser.add_argument("--num_trials", default=30, type=int)                       # Number of evaluators
-parser.add_argument("--num_evaluators", default=30, type=int)                   # Number of evaluators
+parser.add_argument("--num_trials", default=10, type=int)                       # Number of evaluators
+parser.add_argument("--num_evaluators", default=4, type=int)                   # Number of evaluators
 parser.add_argument("--viz_port", default=8097)                                 # visdom server port
 
 args = parser.parse_args()
 
 import ray
-ray.init(num_gpus=1, include_webui=True, temp_dir="./ray_tmp")
+ray.init(num_gpus=0, include_webui=True, temp_dir="./ray_tmp")
 
 if __name__ == "__main__":
     #torch.set_num_threads(4)
@@ -81,8 +84,18 @@ if __name__ == "__main__":
     experiment_name = "{}_{}_{}".format(args.policy_name, args.env_name, args.num_actors)
     print("DISTRIBUTED Policy: {}\nEnvironment: {}\n# of Actors:{}".format(args.policy_name, args.env_name, args.num_actors))
 
-    # Environment and Visdom Monitoring
-    env_fn = gym_factory(args.env_name)
+    # Environment
+    if(args.env_name in ["Cassie-v0", "Cassie-mimic-v0", "Cassie-mimic-walking-v0"]):
+        # set up cassie environment
+        import gym_cassie
+        env = gym.make("Cassie-mimic-v0")
+        max_episode_steps = 400
+    else:
+        env_fn = gym_factory(args.env_name)
+        #max_episode_steps = env_fn()._max_episode_steps
+        max_episode_steps = 1000
+
+    # Visdom Monitoring
     obs_dim = env_fn().observation_space.shape[0]
     action_dim = env_fn().action_space.shape[0]
 

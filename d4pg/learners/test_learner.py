@@ -1,5 +1,5 @@
-from apex.model.layernorm_actor_critic import LN_Actor as Actor, LN_TD3Critic as Critic
-from apex.utils import evaluator
+from d4pg.model.layernorm_actor_critic import LN_Actor as Actor, LN_TD3Critic as Critic
+from d4pg.utils import evaluator
 
 import os
 import numpy as np
@@ -11,36 +11,10 @@ import torch.nn.functional as F
 import time
 
 import gym
-import gym_cassie
-
-def gym_factory(path, **kwargs):
-    from functools import partial
-
-    """
-    This is (mostly) equivalent to gym.make(), but it returns an *uninstantiated* 
-    environment constructor.
-
-    Since environments containing cpointers (e.g. Mujoco envs) can't be serialized, 
-    this allows us to pass their constructors to Ray remote functions instead 
-    (since the gym registry isn't shared across ray subprocesses we can't simply 
-    pass gym.make() either)
-
-    Note: env.unwrapped.spec is never set, if that matters for some reason.
-    """
-    spec = gym.envs.registry.spec(path)
-    _kwargs = spec._kwargs.copy()
-    _kwargs.update(kwargs)
-    
-    if callable(spec._entry_point):
-        cls = spec._entry_point(**_kwargs)
-    else:
-        cls = gym.envs.registration.load(spec._entry_point)
-
-    return partial(cls, **_kwargs)
 
 import ray
 
-@ray.remote(num_gpus=1)
+@ray.remote(num_gpus=0)
 class Learner(object):
     def __init__(self, env_fn, memory_server, learning_episodes, state_space, action_space,
                  batch_size=500, discount=0.99, tau=0.005, eval_update_freq=10,
@@ -111,7 +85,7 @@ class Learner(object):
         print('Untrained Policy: {}'.format( self.evaluate(trials=self.num_of_evaluators, num_of_workers=self.num_of_evaluators) ))
 
         # also dump ray timeline
-        ray.timeline(filename="./ray_timeline.json")
+        # ray.timeline(filename="./ray_timeline.json")
 
         self.update_and_evaluate()
 
@@ -149,8 +123,8 @@ class Learner(object):
             self.save()
 
             # also dump ray timelines
-            ray.timeline(filename="./ray_timeline.json")
-            ray.object_transfer_timeline(filename="./ray_object_transfer_timeline.json")
+            # ray.timeline(filename="./ray_timeline.json")
+            # ray.object_transfer_timeline(filename="./ray_object_transfer_timeline.json")
 
     def is_training_finished(self):
         return self.episode_count >= self.learning_episodes

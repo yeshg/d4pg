@@ -3,7 +3,7 @@ import numpy as np
 import ray
 
 # Plot results
-from apex.utils import VisdomLinePlotter
+from d4pg.utils import VisdomLinePlotter
 
 # Code based on:
 # https://github.com/openai/baselines/blob/master/baselines/deepq/replay_buffer.py

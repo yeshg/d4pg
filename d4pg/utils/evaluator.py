@@ -1,7 +1,7 @@
 import torch
 import ray
 
-from apex.model.layernorm_actor_critic import LN_Actor as Actor
+from d4pg.model.layernorm_actor_critic import LN_Actor as Actor
 
 import numpy as np
 
