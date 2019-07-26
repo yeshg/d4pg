@@ -1,5 +1,6 @@
 # saved files
-/trained_models/apex/*
+/trained_models/d4pg/*
+/trained_models/*.pt
 
 .vscode/
 
@@ -16,3 +17,6 @@ eggs/
 
 # Ray timeline
 ray_timeline.json
+
+# ray temp folder
+ray_tmp/

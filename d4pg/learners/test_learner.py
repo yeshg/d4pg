@@ -58,6 +58,9 @@ class Learner(object):
         # results list
         self.results = []
 
+        # highest reward tracker
+        self.highest_return = 0
+
         # experience replay
         self.memory = memory_server
 
@@ -119,8 +122,12 @@ class Learner(object):
             self.results.append(self.evaluate(trials=self.num_of_evaluators, num_of_workers=self.num_of_evaluators))
             print('Episode {}: {}'.format(self.episode_count, self.results[-1]))
 
-            # also save
-            self.save()
+            # save policy with highest return so far
+            if self.highest_return < self.results[-1]:
+                self.highest_return = self.results[-1]
+
+                # also save
+                self.save()
 
             # also dump ray timelines
             # ray.timeline(filename="./ray_timeline.json")

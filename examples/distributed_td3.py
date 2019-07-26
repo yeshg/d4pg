@@ -6,7 +6,7 @@ from d4pg.learners import Learner
 from d4pg.replay import ReplayBuffer_remote
 
 # Plot results
-from d4pg.utils import VisdomLinePlotter
+from d4pg.utils import Logger
 
 import gym
 
@@ -72,6 +72,11 @@ parser.add_argument("--num_trials", default=10, type=int)                       
 parser.add_argument("--num_evaluators", default=4, type=int)                   # Number of evaluators
 parser.add_argument("--viz_port", default=8097)                                 # visdom server port
 
+# misc args
+parser.add_argument("--name", type=str, default="model")
+parser.add_argument("--seed", type=int, default=1, help="RNG seed")
+parser.add_argument("--logdir", type=str, default="/tmp/apex/experiments/", help="Where to log diagnostics to")
+
 args = parser.parse_args()
 
 import ray
@@ -103,7 +108,7 @@ if __name__ == "__main__":
     # plotter_id = VisdomLinePlotter.remote(env_name=experiment_name, port=args.viz_port)
 
     # Create remote learner (learner will create the evaluators) and replay buffer
-    memory_id = ReplayBuffer_remote.remote(args.replay_size, experiment_name, args.viz_port)
+    memory_id = ReplayBuffer_remote.remote(args.replay_size, experiment_name, args)
     learner_id = Learner.remote(env_fn, memory_id, args.training_episodes, obs_dim, action_dim, batch_size=args.batch_size, discount=args.discount, eval_update_freq=args.eval_update_freq, evaluate_freq=args.evaluate_freq, num_of_evaluators=args.num_evaluators)
 
     # Create remote actors
