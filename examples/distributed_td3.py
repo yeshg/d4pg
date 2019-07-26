@@ -88,7 +88,7 @@ if __name__ == "__main__":
     if(args.env_name in ["Cassie-v0", "Cassie-mimic-v0", "Cassie-mimic-walking-v0"]):
         # set up cassie environment
         import gym_cassie
-        env = gym.make("Cassie-mimic-v0")
+        env_fn = gym_factory(args.env_name)
         max_episode_steps = 400
     else:
         env_fn = gym_factory(args.env_name)
